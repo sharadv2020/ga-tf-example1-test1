@@ -21,9 +21,9 @@ jobs:
       ARM_CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.SUBSCRIPTION_ID }}
       ARM_TENANT_ID: ${{ secrets.TENANT_ID }}
-      TerraformBackendStorageAccount: 'tfstatedevacc'
-      TerraformBackendResourceGroup: 'masonclouds-2-rg'
-      TerraformBackendStorageContainer: 'tfstatedev'
+      TerraformBackendStorageAccount: 'tfdemostgac'
+      TerraformBackendResourceGroup: 'tf_demo_rg'
+      TerraformBackendStorageContainer: 'tfdemoblob'
 
     defaults:
       # Make use of bashshell
