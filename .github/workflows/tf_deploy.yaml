@@ -63,7 +63,7 @@ jobs:
       # Terraform fmt to check configuration files adherence to canonical format
       - name: Terraform format
         id: fmt
-        run: terraform fmt -check
+        run: terraform fmt -check -recursive
 
       - name: Terraform Plan
         id: plan
