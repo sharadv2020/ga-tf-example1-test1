@@ -1,3 +1,4 @@
+# Workflow- Automated process. Often referred to as a pipeline.
 name: 'Terraform Deploy'
 
 on:
@@ -11,6 +12,8 @@ on:
 permissions:
   contents: read
 
+  #Job: A part of the workflow that consists of a sequence of tasks that are
+  # executed on a runner
 jobs:
   terraform:
     name: 'Terraform'
@@ -31,9 +34,22 @@ jobs:
         shell: bash
 
     steps:
-      # Checkoutthe repositoryto the GitHub Action runner
+      # Checkoutthe repository to the GitHub Action runner
       - name: Checkout
         uses: actions/checkout@v3
+
+      # Set-up Infracost tool
+      - name: Setup infracost
+        uses: infracost/actions/setup@v2
+        with:
+          api-key: ${{ secrets.INFRACOST_API_KEY }}
+
+      # Generate infracost baseline in json format
+      - name: Generate Infracost cost estimate baseline
+        run: |
+          infracost breakdown --path=. \
+                              --format=json \
+                              --out-file=/tmp/infracost-base.json
 
       # Install terraform on the runner
       - name: Setup Terraform
@@ -41,15 +57,31 @@ jobs:
 
       # Initialize new/existing terraform working directory
       - name: Terraform Init
+        id: init
         run: terraform init -backend-config=storage_account_name=$TerraformBackendStorageAccount -backend-config=container_name=$TerraformBackendStorageContainer -backend-config=key=dev.tfstate -backend-config=resource_group_name=$TerraformBackendResourceGroup -backend-config=subscription_id="$ARM_SUBSCRIPTION_ID" -backend-config=tenant_id="$ARM_TENANT_ID" -backend-config=client_id="$ARM_CLIENT_ID" -backend-config=client_secret="$ARM_CLIENT_SECRET"
 
       # Terraform fmt to check configuration files adherence to canonical format
       - name: Terraform format
-        run: terraform fmt
+        id: fmt
+        run: terraform fmt -check
 
       - name: Terraform Plan
-        run: terraform plan -out=plan.tfplan -input=false -var="location=eastus" -var="resource_group_name=tfdemo" -var="storage_account_name=tfdemoabcxxyg" -var="storage_account_tier=Standard" -var="virtual_network_name=myvnet"
+        id: plan
+        run: |
+          terraform plan -no-color -input=false -out=TFplan.JSON
+          terraform plan -out=plan.tfplan -input=false -var="location=eastus" -var="resource_group_name=tfdemo" -var="storage_account_name=tfdemoabcxxyg" -var="storage_account_tier=Standard" -var="virtual_network_name=myvnet"
+        continue-on-error: true
+
+      #Generate an Infracost diff and saveto a JSON file
+      - name: Generate Infra Cost
+        run: |
+          infracost diff --path=TFplan.JSON \
+                         --format=json \
+                         --compare-to=/tmp/infracost-base.json \
+                         --out-file=/tmp/infracost.json
+
       - name: Terraform Apply
+        id: apply
         if: ${{ inputs.TFAction == 'apply'}}
         run: terraform apply -input=false -auto-approve plan.tfplan
 
