@@ -86,7 +86,7 @@ jobs:
       - name: Download infracost file
         uses: actions/download-artifact@v3
         with:
-          name: my-artifact
+          name: infracost.json
 
       - name: Terraform Apply
         id: apply
