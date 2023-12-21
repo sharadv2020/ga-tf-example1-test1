@@ -34,5 +34,6 @@ override.tf.json
 terraform.rc
 
 tf_sca_checkov.yaml
-#tf_deploy.yaml
 tf_sca_tfsec.yaml
+tf_deploy.yaml
+
