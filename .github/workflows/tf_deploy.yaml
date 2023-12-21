@@ -2,6 +2,9 @@
 name: 'Terraform Deploy'
 
 on:
+  workflow_run:
+    workflows: ['tf_scan']
+    types: [completed]
   workflow_dispatch:
     inputs:
       TFAction:
