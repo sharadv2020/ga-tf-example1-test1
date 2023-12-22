@@ -4,7 +4,7 @@ on: [pull_request]
 env:
   # If you use private modules you'll need this env variable to use
   # the same ssh-agent socket value across all jobs & steps.
-  SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+  #SSH_AUTH_SOCK: /tmp/ssh_agent.sock
 jobs:
   infracost:
     name: Infracost
